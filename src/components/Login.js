@@ -358,8 +358,16 @@ const Login = () => {
       console.log('Login result received:', result);
       
       if (result && result.success) {
-        console.log('Login successful! Navigating to dashboard...');
-        navigate('/dashboard');
+        // Role-based navigation
+        const userRole = result.data?.user?.role || result.data?.role || '';
+        localStorage.setItem('userRole', userRole);
+        if (userRole === 'family') {
+          // Store full user object for family dashboard
+          localStorage.setItem('familyUser', JSON.stringify(result.data.user));
+          navigate('/family-dashboard');
+        } else {
+          navigate('/dashboard');
+        }
       } else {
         console.log('Login failed:', result);
         setError(result?.message || 'Login failed - Invalid credentials');

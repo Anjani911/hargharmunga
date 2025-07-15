@@ -108,6 +108,24 @@ class ApiService {
       headers: headers
     });
   }
+
+  // POST request with FormData (multipart/form-data)
+  async uploadFormData(endpoint, formData, params = {}) {
+    const url = getEndpointUrl(endpoint, params);
+    const headers = { 
+      'X-API-Key': API_CONFIG.API_KEY
+      // Do NOT set Content-Type here; browser will set it with boundary
+    };
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return this.request(url, {
+      method: 'POST',
+      body: formData,
+      headers: headers
+    });
+  }
 }
 
 // Create and export API service instance

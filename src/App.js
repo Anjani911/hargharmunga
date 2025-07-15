@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
+import FamilyDashboard from './components/FamilyDashboard';
 import { authService } from './services';
 import './App.css';
 
@@ -23,6 +24,14 @@ function App() {
                 <Dashboard />
               </ProtectedRoute>
             } 
+          />
+          <Route 
+            path="/family-dashboard" 
+            element={
+              <ProtectedRoute>
+                <FamilyDashboard />
+              </ProtectedRoute>
+            }
           />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>

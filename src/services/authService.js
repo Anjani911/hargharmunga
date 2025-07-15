@@ -256,29 +256,8 @@ class AuthService {
 
   // User registration
   async register(userData) {
-    console.log('AuthService: Registration attempt with', userData);
-    
-    try {
-      const response = await apiService.post(API_CONFIG.ENDPOINTS.REGISTER, userData);
-      
-      if (response.success) {
-        console.log('AuthService: Registration successful');
-        return {
-          success: true,
-          message: 'Registration successful',
-          data: response.data
-        };
-      } else {
-        throw new Error('Registration failed');
-      }
-    } catch (error) {
-      console.error('AuthService: Registration failed', error.message);
-      return {
-        success: false,
-        message: 'Registration error occurred',
-        error: error.message
-      };
-    }
+    // userData should be a FormData object
+    return apiService.uploadFormData('register', userData);
   }
 
   // Get user details

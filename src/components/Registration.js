@@ -125,13 +125,25 @@ const BackToLogin = styled.div`
 function Registration({ onSwitchToLogin }) {
   const [formData, setFormData] = useState({
     username: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
     name: '',
-    role: 'user',
-    phone: ''
+    guardian_name: '',
+    father_name: '',
+    mother_name: '',
+    age: '',
+    dob: '',
+    aanganwadi_code: '',
+    weight: '',
+    height: '',
+    health_status: 'healthy',
+    village: '',
+    ward: '',
+    panchayat: '',
+    district: '',
+    block: '',
+    address: '',
   });
+  const [plantPhoto, setPlantPhoto] = useState(null);
+  const [pledgePhoto, setPledgePhoto] = useState(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ text: '', type: '' });
 
@@ -143,38 +155,37 @@ function Registration({ onSwitchToLogin }) {
     }));
   };
 
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    if (name === 'plant_photo') setPlantPhoto(files[0]);
+    if (name === 'pledge_photo') setPledgePhoto(files[0]);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage({ text: '', type: '' });
 
-    // Validation
-    if (formData.password !== formData.confirmPassword) {
-      setMessage({ text: 'Passwords do not match', type: 'error' });
-      setLoading(false);
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setMessage({ text: 'Password must be at least 6 characters', type: 'error' });
-      setLoading(false);
-      return;
-    }
-
     try {
-      const { confirmPassword, ...registrationData } = formData;
-      const result = await apiService.post('register', registrationData);
-
-
-      if (result.success) {
+      const fd = new window.FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        fd.append(key, value);
+      });
+      if (plantPhoto) fd.append('plant_photo', plantPhoto);
+      if (pledgePhoto) fd.append('pledge_photo', pledgePhoto);
+      // For address, combine if needed
+      if (!formData.address) {
+        const address = `${formData.village}, Ward ${formData.ward}, Panchayat ${formData.panchayat}, Block ${formData.block}, District ${formData.district}`;
+        fd.set('address', address);
+      }
+      const result = await apiService.uploadFormData('register', fd);
+      if (result.success && result.data.success) {
         setMessage({ text: 'Registration successful! You can now login.', type: 'success' });
         setTimeout(() => {
-          if (onSwitchToLogin) {
-            onSwitchToLogin();
-          }
+          if (onSwitchToLogin) onSwitchToLogin();
         }, 2000);
       } else {
-        setMessage({ text: result.error || 'Registration failed', type: 'error' });
+        setMessage({ text: (result.data && result.data.message) || 'Registration failed', type: 'error' });
       }
     } catch (error) {
       setMessage({ text: 'Registration failed. Please try again.', type: 'error' });
@@ -220,62 +231,206 @@ function Registration({ onSwitchToLogin }) {
           </FormGroup>
 
           <FormGroup>
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="guardian_name">Guardian Name</Label>
             <Input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
+              type="text"
+              id="guardian_name"
+              name="guardian_name"
+              value={formData.guardian_name}
               onChange={handleInputChange}
               required
             />
           </FormGroup>
 
           <FormGroup>
-            <Label htmlFor="phone">Phone Number</Label>
+            <Label htmlFor="father_name">Father Name</Label>
             <Input
-              type="tel"
-              id="phone"
-              name="phone"
-              value={formData.phone}
+              type="text"
+              id="father_name"
+              name="father_name"
+              value={formData.father_name}
               onChange={handleInputChange}
+              required
             />
           </FormGroup>
 
           <FormGroup>
-            <Label htmlFor="role">Role</Label>
+            <Label htmlFor="mother_name">Mother Name</Label>
+            <Input
+              type="text"
+              id="mother_name"
+              name="mother_name"
+              value={formData.mother_name}
+              onChange={handleInputChange}
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label htmlFor="age">Age</Label>
+            <Input
+              type="number"
+              id="age"
+              name="age"
+              value={formData.age}
+              onChange={handleInputChange}
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label htmlFor="dob">Date of Birth</Label>
+            <Input
+              type="date"
+              id="dob"
+              name="dob"
+              value={formData.dob}
+              onChange={handleInputChange}
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label htmlFor="aanganwadi_code">Aanganwadi Code</Label>
+            <Input
+              type="text"
+              id="aanganwadi_code"
+              name="aanganwadi_code"
+              value={formData.aanganwadi_code}
+              onChange={handleInputChange}
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label htmlFor="weight">Weight (kg)</Label>
+            <Input
+              type="number"
+              id="weight"
+              name="weight"
+              value={formData.weight}
+              onChange={handleInputChange}
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label htmlFor="height">Height (cm)</Label>
+            <Input
+              type="number"
+              id="height"
+              name="height"
+              value={formData.height}
+              onChange={handleInputChange}
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label htmlFor="health_status">Health Status</Label>
             <Select
-              id="role"
-              name="role"
-              value={formData.role}
+              id="health_status"
+              name="health_status"
+              value={formData.health_status}
               onChange={handleInputChange}
             >
-              <option value="user">User</option>
-              <option value="supervisor">Supervisor</option>
-              <option value="admin">Admin</option>
+              <option value="healthy">Healthy</option>
+              <option value="sick">Sick</option>
+              <option value="injured">Injured</option>
             </Select>
           </FormGroup>
 
           <FormGroup>
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="village">Village</Label>
             <Input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
+              type="text"
+              id="village"
+              name="village"
+              value={formData.village}
               onChange={handleInputChange}
               required
             />
           </FormGroup>
 
           <FormGroup>
-            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Label htmlFor="ward">Ward</Label>
             <Input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
+              type="text"
+              id="ward"
+              name="ward"
+              value={formData.ward}
               onChange={handleInputChange}
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label htmlFor="panchayat">Panchayat</Label>
+            <Input
+              type="text"
+              id="panchayat"
+              name="panchayat"
+              value={formData.panchayat}
+              onChange={handleInputChange}
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label htmlFor="district">District</Label>
+            <Input
+              type="text"
+              id="district"
+              name="district"
+              value={formData.district}
+              onChange={handleInputChange}
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label htmlFor="block">Block</Label>
+            <Input
+              type="text"
+              id="block"
+              name="block"
+              value={formData.block}
+              onChange={handleInputChange}
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label htmlFor="address">Address (if different from village)</Label>
+            <Input
+              type="text"
+              id="address"
+              name="address"
+              value={formData.address}
+              onChange={handleInputChange}
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label htmlFor="plant_photo">Plant Photo</Label>
+            <Input
+              type="file"
+              id="plant_photo"
+              name="plant_photo"
+              onChange={handleFileChange}
+              accept="image/*"
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <Label htmlFor="pledge_photo">Pledge Photo</Label>
+            <Input
+              type="file"
+              id="pledge_photo"
+              name="pledge_photo"
+              onChange={handleFileChange}
+              accept="image/*"
               required
             />
           </FormGroup>

@@ -6,7 +6,7 @@ const API_CONFIG = {
   API_KEY: process.env.REACT_APP_API_KEY || 'demo-hgm-api-key-2024-raipur',
   
   // Base URL - Your real backend server URL
-  BASE_URL: process.env.REACT_APP_API_URL || 'https://grx6djfl-5000.inc1.devtunnels.ms',
+  BASE_URL: 'https://grx6djfl-5000.inc1.devtunnels.ms', // LIVE BACKEND URL
   
   // Debug mode
   DEBUG_MODE: process.env.REACT_APP_DEBUG_MODE === 'true',
@@ -23,7 +23,7 @@ const API_CONFIG = {
     REFRESH_TOKEN: '/auth/refresh',
     
     // User Details
-    USER_DETAILS: '/details',
+    USER_DETAILS: '/details', // FETCH DETAILS API
     ROOT: '/',
     
     // Dashboard Stats (will be mapped to your backend routes)
