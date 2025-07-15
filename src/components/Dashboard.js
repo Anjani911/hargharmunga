@@ -88,8 +88,9 @@ const SidebarButton = ({ icon, label, active, onClick }) => (
 );
 
 // COMPONENT: Student Card
-const StudentCard = ({ student }) => (
+const StudentCard = ({ student, onClick }) => (
   <div
+    onClick={() => onClick(student)} // Add onClick handler
     style={{
       background: "white",
       borderRadius: 12,
@@ -102,7 +103,11 @@ const StudentCard = ({ student }) => (
       display: "flex",
       flexDirection: "column",
       gap: 8,
+      cursor: "pointer", // Indicate it's clickable
+      transition: "transform 0.2s ease-in-out",
     }}
+    onMouseOver={(e) => (e.currentTarget.style.transform = "translateY(-5px)")}
+    onMouseOut={(e) => (e.currentTarget.style.transform = "translateY(0)")}
   >
     <div style={{ fontWeight: "bold", fontSize: 18, color: "#2E7D32" }}>
       {student.childName || student.name}
@@ -161,6 +166,96 @@ const StatCard = ({ label, value, icon }) => (
   </div>
 );
 
+// New Component: StudentDetailModal
+const StudentDetailModal = ({ student, onClose }) => {
+  if (!student) return null;
+
+  // Function to render a detail row, handling potentially missing data
+  const renderDetailRow = (label, value) => {
+    if (value === undefined || value === null || value === "") {
+      return null; // Don't render the row if data is missing
+    }
+    return (
+      <div style={{ marginBottom: '10px' }}>
+        <strong>{label}:</strong> {value}
+      </div>
+    );
+  };
+
+  return (
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(0, 0, 0, 0.6)",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 1000,
+      }}
+    >
+      <div
+        style={{
+          background: "white",
+          padding: "30px",
+          borderRadius: "15px",
+          boxShadow: "0 5px 20px rgba(0, 0, 0, 0.2)",
+          maxWidth: "500px",
+          width: "90%",
+          maxHeight: "80vh",
+          overflowY: "auto",
+          position: "relative",
+        }}
+      >
+        <button
+          onClick={onClose}
+          style={{
+            position: "absolute",
+            top: "15px",
+            right: "15px",
+            background: "none",
+            border: "none",
+            fontSize: "24px",
+            cursor: "pointer",
+            color: "#333",
+          }}
+        >
+          &times;
+        </button>
+        <h2 style={{ color: "#2E7D32", marginBottom: "20px", borderBottom: '1px solid #eee', paddingBottom: '10px' }}>
+          Student Details: {student.childName || student.name}
+        </h2>
+        <div style={{ fontSize: "16px", lineHeight: "1.6" }}>
+          {renderDetailRow("Child Name", student.childName || student.name)}
+          {renderDetailRow("Parent Name", student.parentName || student.guardian_name || student.father_name)}
+          {renderDetailRow("Mobile Number", student.mobileNumber || student.username)}
+          {renderDetailRow("Village/Address", student.village || student.address)}
+          {renderDetailRow("Anganwadi Center", student.anganwadiCenter)}
+          {renderDetailRow("Date of Birth", student.dob)}
+          {renderDetailRow("Gender", student.gender)}
+          {renderDetailRow("Aadhar Number", student.aadharNumber)}
+          {renderDetailRow("Plant Distributed", student.plantDistributed ? "Yes" : "No")}
+          {renderDetailRow("Registration Date", student.registrationDate)}
+          {/* Add more fields as needed based on your data structure */}
+          {Object.keys(student).map((key) => {
+            // Only render if the key is not already explicitly handled above
+            // and if the value is not empty/null/undefined
+            const displayKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()); // Format key for display
+            if (!['childName', 'name', 'parentName', 'guardian_name', 'father_name', 'mobileNumber', 'username', 'village', 'address', 'anganwadiCenter', 'dob', 'gender', 'aadharNumber', 'plantDistributed', 'registrationDate', 'id'].includes(key) && student[key]) {
+              return renderDetailRow(displayKey, student[key]);
+            }
+            return null;
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 // MAIN COMPONENT: Dashboard
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -171,6 +266,7 @@ const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState("dashboard");
+  const [selectedStudent, setSelectedStudent] = useState(null); // New state for selected student
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -230,6 +326,14 @@ const Dashboard = () => {
     setActiveSection(section);
     if (section === "register") navigate("/register");
     if (section === "logout") handleLogout();
+  };
+
+  const handleCardClick = (student) => {
+    setSelectedStudent(student); // Set the clicked student to state
+  };
+
+  const handleCloseModal = () => {
+    setSelectedStudent(null); // Clear the selected student to close the modal
   };
 
   return (
@@ -393,13 +497,16 @@ const Dashboard = () => {
             ) : (
               <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
                 {filteredStudents.map((s, i) => (
-                  <StudentCard key={s.id || i} student={s} />
+                  <StudentCard key={s.id || i} student={s} onClick={handleCardClick} />
                 ))}
               </div>
             )}
           </div>
         </div>
       </main>
+
+      {/* Student Detail Modal */}
+      <StudentDetailModal student={selectedStudent} onClose={handleCloseModal} />
     </div>
   );
 };
