@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import styled from 'styled-components';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useApi';
-import authService from '../services/authService';
+import apiService from '../services/apiService';
+
 
 const LoginContainer = styled.div`
   min-height: 100vh;
@@ -323,11 +324,17 @@ const Login = () => {
     setConnectionStatus('');
     
     try {
-      const result = await authService.testConnection();
+      const result = await apiService.post('login', {
+        username: credentials.username,
+        password: credentials.password
+});
+
+
       
       if (result.success) {
-        setConnectionStatus('✅ Backend connection successful! You can now login.');
-      } else {
+  localStorage.setItem('authToken', result.data.token);
+}
+ else {
         setConnectionStatus('❌ Backend connection failed. Using demo mode.');
       }
     } catch (error) {

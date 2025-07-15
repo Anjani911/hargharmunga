@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import authService from '../services/authService';
+import apiService from '../services/apiService';
 
 const RegistrationContainer = styled.div`
   min-height: 100vh;
@@ -163,7 +163,8 @@ function Registration({ onSwitchToLogin }) {
 
     try {
       const { confirmPassword, ...registrationData } = formData;
-      const result = await authService.register(registrationData);
+      const result = await apiService.post('register', registrationData);
+
 
       if (result.success) {
         setMessage({ text: 'Registration successful! You can now login.', type: 'success' });
@@ -173,7 +174,7 @@ function Registration({ onSwitchToLogin }) {
           }
         }, 2000);
       } else {
-        setMessage({ text: result.message || 'Registration failed', type: 'error' });
+        setMessage({ text: result.error || 'Registration failed', type: 'error' });
       }
     } catch (error) {
       setMessage({ text: 'Registration failed. Please try again.', type: 'error' });
