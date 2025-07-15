@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import API_CONFIG from "../config/api";
 
 const AllStudentsTable = () => {
   const [rows, setRows] = useState([]);
@@ -12,7 +13,7 @@ const AllStudentsTable = () => {
       setError("");
       try {
         const res = await fetch(
-          "https://grx6djfl-5000.inc1.devtunnels.ms/data"
+          `${API_CONFIG.BASE_URL}/data`
         );
         const html = await res.text();
         // Parse HTML table

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import authService from '../services/authService';
+import API_CONFIG from "../config/api";
 
 const TestContainer = styled.div`
   max-width: 800px;
@@ -165,7 +166,7 @@ function BackendTester() {
   return (
     <TestContainer>
       <Title>🧪 Backend API Tester</Title>
-      <p>Test your backend APIs: <strong>https://grx6djfl-5000.inc1.devtunnels.ms</strong></p>
+      <p>Test your backend APIs: <strong>{API_CONFIG.BASE_URL}</strong></p>
 
       <TestSection>
         <h3>🔗 Connection Test</h3>
@@ -264,7 +265,7 @@ function BackendTester() {
           {'\n'}• POST /register (User registration)
           {'\n'}• GET  /details (User details)
           {'\n'}
-          {'\n'}<strong>Backend URL:</strong> https://grx6djfl-5000.inc1.devtunnels.ms
+          {'\n'}<strong>Backend URL:</strong> {API_CONFIG.BASE_URL}
           {'\n'}
           {'\n'}<strong>Expected Request/Response Format:</strong>
           {'\n'}Login: {"{ username, password }"}

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import API_CONFIG from "../config/api";
 
 const formStyle = {
   maxWidth: 400,
@@ -58,7 +59,7 @@ const AnganwadiAdd = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:5000/api/anganwadi", {
+      const response = await fetch(`${API_CONFIG.BASE_URL}/api/anganwadi`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

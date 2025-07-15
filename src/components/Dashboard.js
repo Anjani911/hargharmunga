@@ -177,7 +177,7 @@ const Dashboard = () => {
       setLoading(true);
       try {
         const res = await fetch(
-          "https://grx6djfl-5000.inc1.devtunnels.ms/data"
+          "https://grx6djfl-5001.inc1.devtunnels.ms/data"
         );
         const html = await res.text();
         const doc = new window.DOMParser().parseFromString(html, "text/html");
