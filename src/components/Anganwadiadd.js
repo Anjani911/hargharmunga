@@ -1,8 +1,7 @@
 import React, { useState } from "react";
-import API_CONFIG from "../config/api";
 
 const formStyle = {
-  maxWidth: 400,
+  maxWidth: "600px",
   margin: "40px auto",
   padding: "24px",
   border: "1px solid #b2dfdb",
@@ -13,7 +12,7 @@ const formStyle = {
 
 const labelStyle = {
   display: "block",
-  marginBottom: "8px",
+  marginBottom: "20px",
   fontWeight: "bold",
   color: "#388e3c",
 };
@@ -45,10 +44,15 @@ const buttonStyle = {
 
 const AnganwadiAdd = () => {
   const [form, setForm] = useState({
+    aanganwaadi_id: "",
     name: "",
-    centerLocation: "",
+    role: "",
+    contact_number: "",
+    password_hash: "",
+    zila: "",
+    tehsil: "",
     block: "",
-    village: "",
+    gram: "",
   });
 
   const handleChange = (e) => {
@@ -59,18 +63,31 @@ const AnganwadiAdd = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch(`${API_CONFIG.BASE_URL}/api/anganwadi`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
-      });
+      const response = await fetch(
+        "https://grx6djfl-5001.inc1.devtunnels.ms/registerAng",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(form),
+        }
+      );
 
       const data = await response.json();
       console.log("Submitted:", data);
       alert("Anganwadi center added successfully!");
-      setForm({ name: "", centerLocation: "", block: "", village: "" });
+      setForm({
+        aanganwaadi_id: "",
+        name: "",
+        role: "",
+        contact_number: "",
+        password_hash: "",
+        zila: "",
+        tehsil: "",
+        block: "",
+        gram: "",
+      });
     } catch (error) {
       console.error("Error submitting form:", error);
       alert("Something went wrong.");
@@ -84,6 +101,19 @@ const AnganwadiAdd = () => {
       >
         Add Anganwadi Details
       </h2>
+
+      <label style={labelStyle}>
+        Anganwadi ID:
+        <input
+          type="text"
+          name="aanganwaadi_id"
+          value={form.aanganwaadi_id}
+          onChange={handleChange}
+          required
+          style={inputStyle}
+        />
+      </label>
+
       <label style={labelStyle}>
         Name:
         <input
@@ -97,11 +127,63 @@ const AnganwadiAdd = () => {
       </label>
 
       <label style={labelStyle}>
-        Center Location:
+        Role:
+        <select
+          name="role"
+          value={form.role}
+          onChange={handleChange}
+          required
+          style={{ ...inputStyle, backgroundColor: "#f1f8e9" }}
+        >
+          <option value="">-- Select Role --</option>
+          <option value="admin">admin</option>
+          <option value="aanganwadi_worker">aanganwadi_worker</option>
+          <option value="health_worker">health_worker</option>
+        </select>
+      </label>
+
+      <label style={labelStyle}>
+        Contact Number:
         <input
           type="text"
-          name="centerLocation"
-          value={form.centerLocation}
+          name="contact_number"
+          value={form.contact_number}
+          onChange={handleChange}
+          required
+          style={inputStyle}
+        />
+      </label>
+
+      <label style={labelStyle}>
+        Password:
+        <input
+          type="password"
+          name="password_hash"
+          value={form.password_hash}
+          onChange={handleChange}
+          required
+          style={inputStyle}
+        />
+      </label>
+
+      <label style={labelStyle}>
+        Zila:
+        <input
+          type="text"
+          name="zila"
+          value={form.zila}
+          onChange={handleChange}
+          required
+          style={inputStyle}
+        />
+      </label>
+
+      <label style={labelStyle}>
+        Tehsil:
+        <input
+          type="text"
+          name="tehsil"
+          value={form.tehsil}
           onChange={handleChange}
           required
           style={inputStyle}
@@ -121,11 +203,11 @@ const AnganwadiAdd = () => {
       </label>
 
       <label style={labelStyle}>
-        Village Name:
+        Gram (Village):
         <input
           type="text"
-          name="village"
-          value={form.village}
+          name="gram"
+          value={form.gram}
           onChange={handleChange}
           required
           style={inputStyle}
