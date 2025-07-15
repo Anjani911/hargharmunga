@@ -56,21 +56,23 @@ const AnganwadiAdd = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
-      const response = await fetch(
-        "https://jsonplaceholder.typicode.com/posts",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(form),
-        }
-      );
+      const response = await fetch("http://localhost:5000/api/anganwadi", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
       const data = await response.json();
       console.log("Submitted:", data);
+      alert("Anganwadi center added successfully!");
+      setForm({ name: "", centerLocation: "", block: "", village: "" });
     } catch (error) {
       console.error("Error submitting form:", error);
+      alert("Something went wrong.");
     }
   };
 
@@ -81,58 +83,54 @@ const AnganwadiAdd = () => {
       >
         Add Anganwadi Details
       </h2>
-      <div>
-        <label style={labelStyle}>
-          Name:
-          <input
-            type="text"
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            required
-            style={inputStyle}
-          />
-        </label>
-      </div>
-      <div>
-        <label style={labelStyle}>
-          Center Location:
-          <input
-            type="text"
-            name="centerLocation"
-            value={form.centerLocation}
-            onChange={handleChange}
-            required
-            style={inputStyle}
-          />
-        </label>
-      </div>
-      <div>
-        <label style={labelStyle}>
-          Block:
-          <input
-            type="text"
-            name="block"
-            value={form.block}
-            onChange={handleChange}
-            required
-            style={inputStyle}
-          />
-        </label>
-      </div>
-      <div>
-        <label style={labelStyle}>
-          Village Name:
-          <input
-            type="text"
-            name="village"
-            value={form.village}
-            onChange={handleChange}
-            required
-            style={inputStyle}
-          />
-        </label>
-      </div>
+      <label style={labelStyle}>
+        Name:
+        <input
+          type="text"
+          name="name"
+          value={form.name}
+          onChange={handleChange}
+          required
+          style={inputStyle}
+        />
+      </label>
+
+      <label style={labelStyle}>
+        Center Location:
+        <input
+          type="text"
+          name="centerLocation"
+          value={form.centerLocation}
+          onChange={handleChange}
+          required
+          style={inputStyle}
+        />
+      </label>
+
+      <label style={labelStyle}>
+        Block:
+        <input
+          type="text"
+          name="block"
+          value={form.block}
+          onChange={handleChange}
+          required
+          style={inputStyle}
+        />
+      </label>
+
+      <label style={labelStyle}>
+        Village Name:
+        <input
+          type="text"
+          name="village"
+          value={form.village}
+          onChange={handleChange}
+          required
+          style={inputStyle}
+        />
+      </label>
+
       <button type="submit" style={buttonStyle}>
         Add Anganwadi
       </button>
