@@ -342,23 +342,26 @@ const Login = () => {
     setLoading(true);
     setError('');
 
+    console.log('=== LOGIN DEBUG START ===');
     console.log('Login attempt with credentials:', credentials);
 
     try {
+      console.log('Calling login function...');
       const result = await login(credentials);
-      console.log('Login result:', result);
+      console.log('Login result received:', result);
       
-      if (result.success) {
-        console.log('Login successful, navigating to dashboard...');
+      if (result && result.success) {
+        console.log('Login successful! Navigating to dashboard...');
         navigate('/dashboard');
       } else {
-        console.log('Login failed:', result.message);
-        setError(result.message || 'Login failed');
+        console.log('Login failed:', result);
+        setError(result?.message || 'Login failed - Invalid credentials');
       }
     } catch (err) {
-      console.error('Login error:', err);
-      setError('Login failed');
+      console.error('Login error caught:', err);
+      setError('Login error: ' + err.message);
     } finally {
+      console.log('=== LOGIN DEBUG END ===');
       setLoading(false);
     }
   };
@@ -446,14 +449,6 @@ const Login = () => {
             {error && (
               <ConnectionStatus className="error">{error}</ConnectionStatus>
             )}
-
-            <RememberSection>
-              <label>
-                <input type="checkbox" />
-                मुझे याद रखें
-              </label>
-              <a href="#forgot">पासवर्ड भूल गए?</a>
-            </RememberSection>
 
             <RememberSection>
               <label>
