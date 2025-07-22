@@ -8,7 +8,15 @@ import { useAuth } from "../hooks/useApi";
 /* -------------------------------------------------- */
 const icons = {
   dashboard: (
-    <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="24"
+      height="24"
+      fill="none"
+      stroke="#fff"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <rect x="3" y="3" width="7" height="9" />
       <rect x="14" y="3" width="7" height="5" />
       <rect x="14" y="12" width="7" height="9" />
@@ -16,7 +24,15 @@ const icons = {
     </svg>
   ),
   logout: (
-    <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <svg
+      width="24"
+      height="24"
+      fill="none"
+      stroke="#fff"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
       <polyline points="16 17 21 12 16 7" />
       <line x1="21" y1="12" x2="9" y2="12" />
@@ -47,7 +63,14 @@ const SidebarButton = ({ icon, label, onClick, active = false }) => (
       transition: "background 0.2s",
     }}
   >
-    <span style={{ width: 28, display: "flex", alignItems: "center", justifyContent: "center" }}>
+    <span
+      style={{
+        width: 28,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+    >
       {icon}
     </span>
     <span>{label}</span>
@@ -69,7 +92,14 @@ const StatCard = ({ label, value, icon }) => (
   >
     <div style={{ fontSize: 32 }}>{icon}</div>
     <div style={{ fontSize: 18, color: "#666", marginTop: 8 }}>{label}</div>
-    <div style={{ fontSize: 28, fontWeight: "bold", color: "#2E7D32", marginTop: 8 }}>
+    <div
+      style={{
+        fontSize: 28,
+        fontWeight: "bold",
+        color: "#2E7D32",
+        marginTop: 8,
+      }}
+    >
       {value}
     </div>
   </div>
@@ -102,9 +132,16 @@ const Card = ({ item, onClick }) => (
     <div style={{ fontWeight: "bold", fontSize: 18, color: "#2E7D32" }}>
       {item.aanganwaadi_id}
     </div>
-    <div><strong>Name:</strong> {item.name}</div> {/* changed from Gram */}
-    <div><strong>Block:</strong> {item.block}</div>
-    <div><strong>Contact:</strong> {item.contact_number}</div>
+    <div>
+      <strong>Name:</strong> {item.name}
+    </div>{" "}
+    {/* changed from Gram */}
+    <div>
+      <strong>Block:</strong> {item.block}
+    </div>
+    <div>
+      <strong>Contact:</strong> {item.contact_number}
+    </div>
   </div>
 );
 
@@ -201,14 +238,14 @@ const AnganvadiDashboard = () => {
       console.log("Fetching Anganvadi data…");
       setLoading(true);
       try {
-        const res = await fetch("https://grx6djfl-5001.inc1.devtunnels.ms/searchAng");
+        const res = await fetch("http://165.22.208.62:5000/searchAng");
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const rows = await res.json();
         console.log("Fetched rows:", rows.length);
         setRecords(rows);
         setStats({
           total: rows.length,
-          uniqueVillages: new Set(rows.map(r => r.gram || r.zila || "")).size,
+          uniqueVillages: new Set(rows.map((r) => r.gram || r.zila || "")).size,
         });
       } catch (err) {
         console.error("Fetch error:", err);
@@ -284,15 +321,46 @@ const AnganvadiDashboard = () => {
       <main style={{ flex: 1, padding: "40px 0", overflowY: "auto" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
           {/* Stats */}
-          <div style={{ display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center", marginBottom: 32 }}>
+          <div
+            style={{
+              display: "flex",
+              gap: 16,
+              flexWrap: "wrap",
+              justifyContent: "center",
+              marginBottom: 32,
+            }}
+          >
             <StatCard label="Total Anganwadi" value={stats.total} icon="🏫" />
-            <StatCard label="Unique Villages" value={stats.uniqueVillages} icon="🏡" />
+            <StatCard
+              label="Unique Villages"
+              value={stats.uniqueVillages}
+              icon="🏡"
+            />
           </div>
 
           {/* Search */}
-          <div style={{ background: "#fff", borderRadius: 16, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", padding: 24, marginBottom: 32 }}>
-            <form onSubmit={(e) => e.preventDefault()} style={{ display: "flex", gap: 12, alignItems: "center" }}>
-              <svg width="24" height="24" fill="none" stroke="#2E7D32" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: 16,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+              padding: 24,
+              marginBottom: 32,
+            }}
+          >
+            <form
+              onSubmit={(e) => e.preventDefault()}
+              style={{ display: "flex", gap: 12, alignItems: "center" }}
+            >
+              <svg
+                width="24"
+                height="24"
+                fill="none"
+                stroke="#2E7D32"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
@@ -301,16 +369,40 @@ const AnganvadiDashboard = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search by ID, Name, or Mobile"
-                style={{ padding: 12, borderRadius: 8, border: "1px solid #ccc", fontSize: 16, flex: 1 }}
+                style={{
+                  padding: 12,
+                  borderRadius: 8,
+                  border: "1px solid #ccc",
+                  fontSize: 16,
+                  flex: 1,
+                }}
               />
-              <button type="submit" style={{ padding: "12px 28px", borderRadius: 8, background: "#4CAF50", color: "#fff", border: "none", fontSize: 16, fontWeight: 500 }}>
+              <button
+                type="submit"
+                style={{
+                  padding: "12px 28px",
+                  borderRadius: 8,
+                  background: "#4CAF50",
+                  color: "#fff",
+                  border: "none",
+                  fontSize: 16,
+                  fontWeight: 500,
+                }}
+              >
                 Search
               </button>
             </form>
           </div>
 
           {/* Cards Grid */}
-          <div style={{ background: "#fff", borderRadius: 16, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", padding: 24 }}>
+          <div
+            style={{
+              background: "#fff",
+              borderRadius: 16,
+              boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+              padding: 24,
+            }}
+          >
             <h2 style={{ marginBottom: 24 }}>Anganwadi Records</h2>
             {loading ? (
               <div>Loading…</div>
@@ -319,7 +411,11 @@ const AnganvadiDashboard = () => {
             ) : (
               <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
                 {filteredRecords.map((rec, i) => (
-                  <Card key={rec.id || i} item={rec} onClick={setSelectedRecord} />
+                  <Card
+                    key={rec.id || i}
+                    item={rec}
+                    onClick={setSelectedRecord}
+                  />
                 ))}
               </div>
             )}
@@ -328,7 +424,10 @@ const AnganvadiDashboard = () => {
       </main>
 
       {/* Detail popup */}
-      <DetailModal record={selectedRecord} onClose={() => setSelectedRecord(null)} />
+      <DetailModal
+        record={selectedRecord}
+        onClose={() => setSelectedRecord(null)}
+      />
     </div>
   );
 };

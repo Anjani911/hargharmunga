@@ -214,9 +214,7 @@ const Dashboard = () => {
     const fetchAll = async () => {
       setLoading(true);
       try {
-        const res = await fetch(
-          "https://grx6djfl-5001.inc1.devtunnels.ms/data"
-        );
+        const res = await fetch("http://165.22.208.62:5000/data");
         const html = await res.text();
         const doc = new window.DOMParser().parseFromString(html, "text/html");
         const table = doc.querySelector("table");

@@ -12,9 +12,7 @@ const AllStudentsTable = () => {
       setLoading(true);
       setError("");
       try {
-        const res = await fetch(
-          `${API_CONFIG.BASE_URL}/data`
-        );
+        const res = await fetch(`${API_CONFIG.BASE_URL}/data`);
         const html = await res.text();
         // Parse HTML table
         const parser = new window.DOMParser();

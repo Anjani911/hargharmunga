@@ -63,16 +63,13 @@ const AnganwadiAdd = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch(
-        "https://grx6djfl-5001.inc1.devtunnels.ms/registerAng",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(form),
-        }
-      );
+      const response = await fetch("http://165.22.208.62:5000/registerAng", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
 
       const data = await response.json();
       console.log("Submitted:", data);
