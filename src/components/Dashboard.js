@@ -213,6 +213,32 @@ const StudentDetailModal = ({ student, onClose }) => {
   );
 };
 
+// Message for restricted view on smaller screens
+const RestrictedViewMessage = () => (
+  <div
+    style={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      minHeight: "100vh",
+      background: "#f5f5f5",
+      textAlign: "center",
+      padding: "20px",
+      boxSizing: "border-box",
+    }}
+  >
+    <h2 style={{ color: "#D32F2F", marginBottom: "20px" }}>
+      <span role="img" aria-label="Warning">⚠️</span> Optimized for Larger Screens
+    </h2>
+    <p style={{ fontSize: "18px", lineHeight: "1.6", maxWidth: "500px" }}>
+      This dashboard provides a richer experience on desktop or larger tablet devices.
+      Please access it from a personal computer for full functionality.
+    </p>
+  </div>
+);
+
+
 // Main Dashboard Component
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -224,6 +250,25 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [isSmallScreen, setIsSmallScreen] = useState(false); // New state for screen size
+
+  // Threshold for small screen (e.g., typical phone width)
+  const SMALL_SCREEN_BREAKPOINT = 768; // You can adjust this value
+
+  // Function to check screen size
+  const checkScreenSize = useCallback(() => {
+    setIsSmallScreen(window.innerWidth <= SMALL_SCREEN_BREAKPOINT);
+  }, []);
+
+  // Effect to set up and clean up resize listener
+  useEffect(() => {
+    checkScreenSize(); // Initial check on mount
+    window.addEventListener('resize', checkScreenSize);
+    return () => {
+      window.removeEventListener('resize', checkScreenSize);
+    };
+  }, [checkScreenSize]);
+
 
   // Function to fetch student data
   const fetchAllStudents = useCallback(async () => {
@@ -315,101 +360,106 @@ const Dashboard = () => {
   }, [navigate]);
 
   return (
-    <div style={{ minHeight: "100vh", background: "#f5f5f5", display: "flex" }}>
-      {/* Sidebar */}
-      <aside
-        style={{
-          width: 260,
-          background: "linear-gradient(180deg,#2E7D32,#388e3c)",
-          color: "#fff",
-          display: "flex",
-          flexDirection: "column",
-          padding: "32px 0",
-        }}
-      >
-        <div style={{ fontWeight: "bold", fontSize: 24, textAlign: "center", marginBottom: 24 }}>🌳 हर घर मुंगा</div>
-        <div style={{ padding: "0 20px", marginBottom: 24 }}>
-          <label htmlFor="dashboard-select" style={{ color: "#fff", fontSize: 14, marginBottom: 6, display: "block" }}>
-            Choose Dashboard
-          </label>
-          <select
-            id="dashboard-select"
-            onChange={handleDashboardSelect}
-            defaultValue="student"
-            style={{ width: "100%", padding: 12, borderRadius: 8 }}
-          >
-            <option value="student">Student Dashboard</option>
-            <option value="anganvadi">Anganvadi Dashboard</option>
-          </select>
-        </div>
-        <SidebarButton icon={icons.register} label="Register" onClick={() => setShowRegisterModal(true)} />
-        <div style={{ flex: 1 }} /> {/* Spacer */}
-        <SidebarButton icon={icons.logout} label="Logout" onClick={handleLogout} />
-      </aside>
-
-      {/* Main Content Area */}
-      <main style={{ flex: 1, padding: "40px 0", overflowY: "auto", background: "#f5f5f5" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
-          {/* Stat Cards */}
-          <div style={{ display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center", marginBottom: 32 }}>
-            <StatCard label="Total Students" value={stats.total} icon="👨‍🎓" />
-            <StatCard label="Unique Villages" value={stats.uniqueVillages} icon="🏡" />
+    // Conditional rendering based on screen size
+    isSmallScreen ? (
+      <RestrictedViewMessage />
+    ) : (
+      <div style={{ minHeight: "100vh", background: "#f5f5f5", display: "flex" }}>
+        {/* Sidebar */}
+        <aside
+          style={{
+            width: 260,
+            background: "linear-gradient(180deg,#2E7D32,#388e3c)",
+            color: "#fff",
+            display: "flex",
+            flexDirection: "column",
+            padding: "32px 0",
+          }}
+        >
+          <div style={{ fontWeight: "bold", fontSize: 24, textAlign: "center", marginBottom: 24 }}>🌳 हर घर मुंगा</div>
+          <div style={{ padding: "0 20px", marginBottom: 24 }}>
+            <label htmlFor="dashboard-select" style={{ color: "#fff", fontSize: 14, marginBottom: 6, display: "block" }}>
+              Choose Dashboard
+            </label>
+            <select
+              id="dashboard-select"
+              onChange={handleDashboardSelect}
+              defaultValue="student"
+              style={{ width: "100%", padding: 12, borderRadius: 8 }}
+            >
+              <option value="student">Student Dashboard</option>
+              <option value="anganvadi">Anganvadi Dashboard</option>
+            </select>
           </div>
+          <SidebarButton icon={icons.register} label="Register" onClick={() => setShowRegisterModal(true)} />
+          <div style={{ flex: 1 }} /> {/* Spacer */}
+          <SidebarButton icon={icons.logout} label="Logout" onClick={handleLogout} />
+        </aside>
 
-          {/* Search Bar */}
-          <div style={{ background: "#fff", borderRadius: 16, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", padding: 24, marginBottom: 32 }}>
-            <form onSubmit={(e) => e.preventDefault()} style={{ display: "flex", gap: 12, alignItems: "center" }}>
-              <svg width="24" height="24" fill="none" stroke="#2E7D32" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by name or mobile number"
-                style={{ padding: 12, borderRadius: 8, border: "1px solid #ccc", fontSize: 16, flex: 1 }}
-                aria-label="Search students"
-              />
-              <button
-                type="submit"
-                style={{ padding: "12px 28px", borderRadius: 8, background: "#4CAF50", color: "#fff", border: "none", fontSize: 16 }}
-              >
-                Search
-              </button>
-            </form>
+        {/* Main Content Area */}
+        <main style={{ flex: 1, padding: "40px 0", overflowY: "auto", background: "#f5f5f5" }}>
+          <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
+            {/* Stat Cards */}
+            <div style={{ display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center", marginBottom: 32 }}>
+              <StatCard label="Total Students" value={stats.total} icon="👨‍🎓" />
+              <StatCard label="Unique Villages" value={stats.uniqueVillages} icon="🏡" />
+            </div>
+
+            {/* Search Bar */}
+            <div style={{ background: "#fff", borderRadius: 16, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", padding: 24, marginBottom: 32 }}>
+              <form onSubmit={(e) => e.preventDefault()} style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                <svg width="24" height="24" fill="none" stroke="#2E7D32" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search by name or mobile number"
+                  style={{ padding: 12, borderRadius: 8, border: "1px solid #ccc", fontSize: 16, flex: 1 }}
+                  aria-label="Search students"
+                />
+                <button
+                  type="submit"
+                  style={{ padding: "12px 28px", borderRadius: 8, background: "#4CAF50", color: "#fff", border: "none", fontSize: 16 }}
+                >
+                  Search
+                </button>
+              </form>
+            </div>
+
+            {/* Registered Students Section */}
+            <div style={{ background: "#fff", borderRadius: 16, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", padding: 24 }}>
+              <h2 style={{ marginBottom: 24 }}>Registered Students</h2>
+              {loading ? (
+                <div style={{ textAlign: "center", padding: "20px" }}>Loading student data...</div>
+              ) : filteredStudents.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "20px", color: "#666" }}>No matching student data found.</div>
+              ) : (
+                <div
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 16,
+                    justifyContent: "flex-start", // This is the crucial change for left alignment
+                  }}
+                >
+                  {filteredStudents.map((s, i) => (
+                    // Use a more stable key if available, like a unique ID from the data
+                    <StudentCard key={s.id || s.childName + s.mobileNumber + i} student={s} onClick={setSelectedStudent} />
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
+        </main>
 
-          {/* Registered Students Section */}
-          <div style={{ background: "#fff", borderRadius: 16, boxShadow: "0 2px 8px rgba(0,0,0,0.08)", padding: 24 }}>
-            <h2 style={{ marginBottom: 24 }}>Registered Students</h2>
-            {loading ? (
-              <div style={{ textAlign: "center", padding: "20px" }}>Loading student data...</div>
-            ) : filteredStudents.length === 0 ? (
-              <div style={{ textAlign: "center", padding: "20px", color: "#666" }}>No matching student data found.</div>
-            ) : (
-              <div
-                style={{
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: 16,
-                  justifyContent: "flex-start", // This is the crucial change for left alignment
-                }}
-              >
-                {filteredStudents.map((s, i) => (
-                  // Use a more stable key if available, like a unique ID from the data
-                  <StudentCard key={s.id || s.childName + s.mobileNumber + i} student={s} onClick={setSelectedStudent} />
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </main>
-
-      {/* Modals */}
-      <RegisterModal open={showRegisterModal} onClose={() => setShowRegisterModal(false)} />
-      <StudentDetailModal student={selectedStudent} onClose={() => setSelectedStudent(null)} />
-    </div>
+        {/* Modals */}
+        <RegisterModal open={showRegisterModal} onClose={() => setShowRegisterModal(false)} />
+        <StudentDetailModal student={selectedStudent} onClose={() => setSelectedStudent(null)} />
+      </div>
+    )
   );
 };
 
