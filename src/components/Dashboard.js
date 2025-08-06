@@ -1,9 +1,12 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../hooks/useApi"; // Assuming this hook provides logout functionality
-import AnganwadiAdd from "./Anganwadiadd"; // Assuming this component handles the registration form
+import { useAuth } from "../hooks/useApi"; 
+import AnganwadiAdd from "./Anganwadiadd";
 
-// Icons using SVG for better scalability and customization
+// =========================================================================
+// 1. Reusable Components & Icons (Keep as is, they are well-structured)
+// =========================================================================
+
 const icons = {
   register: (
     <svg width="24" height="24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -21,7 +24,6 @@ const icons = {
   ),
 };
 
-// Reusable Button Component for the Sidebar
 const SidebarButton = ({ icon, label, onClick }) => (
   <button
     onClick={onClick}
@@ -47,7 +49,6 @@ const SidebarButton = ({ icon, label, onClick }) => (
   </button>
 );
 
-// Student Card Component
 const StudentCard = ({ student, onClick }) => (
   <div
     onClick={() => onClick(student)}
@@ -82,7 +83,6 @@ const StudentCard = ({ student, onClick }) => (
   </div>
 );
 
-// Statistic Card Component
 const StatCard = ({ label, value, icon }) => (
   <div
     style={{
@@ -102,7 +102,6 @@ const StatCard = ({ label, value, icon }) => (
   </div>
 );
 
-// Registration Modal Component
 const RegisterModal = ({ open, onClose }) => {
   if (!open) return null;
   return (
@@ -131,7 +130,7 @@ const RegisterModal = ({ open, onClose }) => {
       >
         <button
           onClick={onClose}
-          aria-label="Close registration form" // Added for accessibility
+          aria-label="Close registration form"
           style={{
             position: "absolute",
             top: 12,
@@ -144,14 +143,12 @@ const RegisterModal = ({ open, onClose }) => {
         >
           &times;
         </button>
-        {/* AnganwadiAdd component for the registration form */}
         <AnganwadiAdd />
       </div>
     </div>
   );
 };
 
-// Student Detail Modal Component
 const StudentDetailModal = ({ student, onClose }) => {
   if (!student) return null;
   return (
@@ -180,7 +177,7 @@ const StudentDetailModal = ({ student, onClose }) => {
       >
         <button
           onClick={onClose}
-          aria-label="Close student details" // Added for accessibility
+          aria-label="Close student details"
           style={{
             position: "absolute",
             top: 12,
@@ -194,11 +191,8 @@ const StudentDetailModal = ({ student, onClose }) => {
           &times;
         </button>
         <h2 style={{ marginBottom: 16 }}>Student Details</h2>
-        {/* Dynamically render all key-value pairs from the student object */}
         {Object.entries(student).map(([key, value]) => {
-          // Only render if value is not null/undefined, or if it's a boolean (which could be false)
           if (value !== null && value !== undefined && value !== '') {
-            // Format the key for display (e.g., "childName" -> "Child Name")
             const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
             return (
               <div key={key} style={{ marginBottom: '8px' }}>
@@ -206,14 +200,13 @@ const StudentDetailModal = ({ student, onClose }) => {
               </div>
             );
           }
-          return null; // Don't render empty or null fields
+          return null;
         })}
       </div>
     </div>
   );
 };
 
-// Message for restricted view on smaller screens
 const RestrictedViewMessage = () => (
   <div
     style={{
@@ -238,39 +231,41 @@ const RestrictedViewMessage = () => (
   </div>
 );
 
+// =========================================================================
+// 2. Main Dashboard Component (Updated Layout)
+// =========================================================================
 
-// Main Dashboard Component
 const Dashboard = () => {
   const navigate = useNavigate();
-  const { logout: apiLogout } = useAuth(); // Destructuring logout from useAuth hook
+  const { logout: apiLogout } = useAuth();
 
   const [allStudents, setAllStudents] = useState([]);
-  const [stats, setStats] = useState({ total: 0, uniqueVillages: 0 });
+  const [stats, setStats] = useState({
+    total: 0,
+    uniqueVillages: 0,
+    totalPlantsPlanted: 0,
+    totalPhotosUploaded: 0
+  });
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [selectedStudent, setSelectedStudent] = useState(null);
   const [showRegisterModal, setShowRegisterModal] = useState(false);
-  const [isSmallScreen, setIsSmallScreen] = useState(false); // New state for screen size
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
 
-  // Threshold for small screen (e.g., typical phone width)
-  const SMALL_SCREEN_BREAKPOINT = 768; // You can adjust this value
+  const SMALL_SCREEN_BREAKPOINT = 768;
 
-  // Function to check screen size
   const checkScreenSize = useCallback(() => {
     setIsSmallScreen(window.innerWidth <= SMALL_SCREEN_BREAKPOINT);
   }, []);
 
-  // Effect to set up and clean up resize listener
   useEffect(() => {
-    checkScreenSize(); // Initial check on mount
+    checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
     return () => {
       window.removeEventListener('resize', checkScreenSize);
     };
   }, [checkScreenSize]);
 
-
-  // Function to fetch student data
   const fetchAllStudents = useCallback(async () => {
     setLoading(true);
     try {
@@ -280,7 +275,6 @@ const Dashboard = () => {
       }
       const html = await res.text();
 
-      // Check if DOMParser is available
       if (typeof window.DOMParser === 'undefined') {
         console.error("DOMParser is not supported in this environment.");
         return;
@@ -291,8 +285,8 @@ const Dashboard = () => {
 
       if (!table) {
         console.warn("No table found in the fetched HTML data.");
-        setAllStudents([]); // Ensure students array is cleared if no table
-        setStats({ total: 0, uniqueVillages: 0 });
+        setAllStudents([]);
+        setStats({ total: 0, uniqueVillages: 0, totalPlantsPlanted: 0, totalPhotosUploaded: 0 });
         return;
       }
 
@@ -301,38 +295,44 @@ const Dashboard = () => {
         const obj = {};
         const tds = [...tr.querySelectorAll("td")];
         cols.forEach((col, i) => {
-          // Corrected: Removed the erroneous backslash before [i]
           obj[(col || `column${i}`).trim()] = (tds.length > i ? tds[i].textContent.trim() : '');
         });
         return obj;
       });
 
-      // Filter out incomplete records
       const cleanedRows = rows.filter((student) => {
         const hasName = student.name?.trim() || student.childName?.trim();
         const hasContact = student.mobileNumber?.trim() || student.username?.trim();
         return hasName && hasContact;
       });
 
+      const totalPlants = cleanedRows.filter(
+        (student) => student.plant_photo && student.plant_photo !== "None"
+      ).length;
+
+      const totalPhotos = cleanedRows.reduce(
+        (sum, student) => sum + (parseInt(student.totalImagesYet) || 0),
+        0
+      );
+
       setAllStudents(cleanedRows);
       setStats({
         total: cleanedRows.length,
-        uniqueVillages: new Set(cleanedRows.map((s) => s.village || s.address).filter(Boolean)).size, // Filter out empty strings
+        uniqueVillages: new Set(cleanedRows.map((s) => s.village || s.address).filter(Boolean)).size,
+        totalPlantsPlanted: totalPlants,
+        totalPhotosUploaded: totalPhotos
       });
     } catch (err) {
       console.error("Error fetching or parsing student data:", err);
-      // Optionally show an error message to the user
     } finally {
       setLoading(false);
     }
-  }, []); // Empty dependency array means this function is created once
+  }, []);
 
-  // Fetch data on component mount
   useEffect(() => {
     fetchAllStudents();
-  }, [fetchAllStudents]); // Depend on fetchAllStudents (which is useCallback memoized)
+  }, [fetchAllStudents]);
 
-  // Memoized filtering of students based on search query
   const filteredStudents = useMemo(() => {
     const q = searchQuery.toLowerCase();
     return allStudents.filter(
@@ -342,38 +342,43 @@ const Dashboard = () => {
     );
   }, [allStudents, searchQuery]);
 
-  // Handle user logout
   const handleLogout = useCallback(async () => {
     try {
-      await apiLogout(); // Call the logout function from your auth hook
-      navigate("/"); // Redirect to the home/login page
+      await apiLogout();
+      navigate("/");
     } catch (error) {
       console.error("Logout failed:", error);
-      // Handle logout error, e.g., show a notification
     }
   }, [apiLogout, navigate]);
 
-  // Handle dashboard selection change
   const handleDashboardSelect = useCallback((e) => {
     const value = e.target.value;
     navigate(value === "student" ? "/" : "/anganvadi-dashboard");
   }, [navigate]);
 
   return (
-    // Conditional rendering based on screen size
     isSmallScreen ? (
       <RestrictedViewMessage />
     ) : (
-      <div style={{ minHeight: "100vh", background: "#f5f5f5", display: "flex" }}>
+      // New: Use a grid container for the main layout
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "260px 1fr", // 260px for sidebar, 1fr for main content
+          minHeight: "100vh",
+          backgroundColor: "#f5f5f5", // Apply the background to the entire container
+        }}
+      >
         {/* Sidebar */}
         <aside
           style={{
-            width: 260,
+            // No need for a fixed width here, as the grid column defines it
             background: "linear-gradient(180deg,#2E7D32,#388e3c)",
             color: "#fff",
             display: "flex",
             flexDirection: "column",
             padding: "32px 0",
+            overflowY: "auto", // In case the sidebar content overflows
           }}
         >
           <div style={{ fontWeight: "bold", fontSize: 24, textAlign: "center", marginBottom: 24 }}>🌳 हर घर मुंगा</div>
@@ -397,12 +402,21 @@ const Dashboard = () => {
         </aside>
 
         {/* Main Content Area */}
-        <main style={{ flex: 1, padding: "40px 0", overflowY: "auto", background: "#f5f5f5" }}>
+        <main
+          style={{
+            // The grid layout takes care of the width and height
+            padding: "40px 0",
+            overflowY: "auto",
+            backgroundColor: "#f5f5f5", // Redundant but good practice for clarity
+          }}
+        >
           <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px" }}>
             {/* Stat Cards */}
             <div style={{ display: "flex", gap: 16, flexWrap: "wrap", justifyContent: "center", marginBottom: 32 }}>
               <StatCard label="Total Students" value={stats.total} icon="👨‍🎓" />
               <StatCard label="Unique Villages" value={stats.uniqueVillages} icon="🏡" />
+              <StatCard label="Total Plants Planted" value={stats.totalPlantsPlanted} icon="🌳" />
+              <StatCard label="Total Photos Uploaded" value={stats.totalPhotosUploaded} icon="📷" />
             </div>
 
             {/* Search Bar */}
@@ -442,11 +456,10 @@ const Dashboard = () => {
                     display: "flex",
                     flexWrap: "wrap",
                     gap: 16,
-                    justifyContent: "flex-start", // This is the crucial change for left alignment
+                    justifyContent: "flex-start",
                   }}
                 >
                   {filteredStudents.map((s, i) => (
-                    // Use a more stable key if available, like a unique ID from the data
                     <StudentCard key={s.id || s.childName + s.mobileNumber + i} student={s} onClick={setSelectedStudent} />
                   ))}
                 </div>
