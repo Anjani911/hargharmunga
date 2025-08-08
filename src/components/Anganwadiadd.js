@@ -44,15 +44,21 @@ const buttonStyle = {
 
 const AnganwadiAdd = () => {
   const [form, setForm] = useState({
-    aanganwaadi_id: "",
+    aanganwadi_id: "",
     name: "",
-    role: "",
+    role: "aanganwadi_worker", // Fixed role - no dropdown needed
     contact_number: "",
     password_hash: "",
     zila: "",
     tehsil: "",
     block: "",
     gram: "",
+    supervisor_name: "",
+    block_name: "",
+    pariyojna_name: "",
+    sector_name: "",
+    village_name: "",
+    aanganwadi_kendra_name: "",
   });
 
   const handleChange = (e) => {
@@ -63,7 +69,7 @@ const AnganwadiAdd = () => {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://165.22.208.62:5000/registerAng", {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/registerAng`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -73,18 +79,29 @@ const AnganwadiAdd = () => {
 
       const data = await response.json();
       console.log("Submitted:", data);
-      alert("Anganwadi center added successfully!");
-      setForm({
-        aanganwaadi_id: "",
-        name: "",
-        role: "",
-        contact_number: "",
-        password_hash: "",
-        zila: "",
-        tehsil: "",
-        block: "",
-        gram: "",
-      });
+      
+      if (data.success) {
+        alert("Anganwadi worker added successfully!");
+        setForm({
+          aanganwadi_id: "",
+          name: "",
+          role: "",
+          contact_number: "",
+          password_hash: "",
+          zila: "",
+          tehsil: "",
+          block: "",
+          gram: "",
+          supervisor_name: "",
+          block_name: "",
+          pariyojna_name: "",
+          sector_name: "",
+          village_name: "",
+          aanganwadi_kendra_name: "",
+        });
+      } else {
+        alert(`Error: ${data.message || 'Failed to add worker'}`);
+      }
     } catch (error) {
       console.error("Error submitting form:", error);
       alert("Something went wrong.");
@@ -103,8 +120,8 @@ const AnganwadiAdd = () => {
         Anganwadi ID:
         <input
           type="text"
-          name="aanganwaadi_id"
-          value={form.aanganwaadi_id}
+          name="aanganwadi_id"
+          value={form.aanganwadi_id}
           onChange={handleChange}
           required
           style={inputStyle}
@@ -121,22 +138,6 @@ const AnganwadiAdd = () => {
           required
           style={inputStyle}
         />
-      </label>
-
-      <label style={labelStyle}>
-        Role:
-        <select
-          name="role"
-          value={form.role}
-          onChange={handleChange}
-          required
-          style={{ ...inputStyle, backgroundColor: "#f1f8e9" }}
-        >
-          <option value="">-- Select Role --</option>
-          <option value="admin">admin</option>
-          <option value="aanganwadi_worker">aanganwadi_worker</option>
-          <option value="health_worker">health_worker</option>
-        </select>
       </label>
 
       <label style={labelStyle}>
@@ -205,14 +206,76 @@ const AnganwadiAdd = () => {
           type="text"
           name="gram"
           value={form.gram}
-          onChange={handleChange}
+          onChange={(e) => {
+            // Update both gram and village_name with the same value
+            setForm({ 
+              ...form, 
+              gram: e.target.value,
+              village_name: e.target.value 
+            });
+          }}
           required
           style={inputStyle}
         />
       </label>
 
+      <label style={labelStyle}>
+        Supervisor Name:
+        <input
+          type="text"
+          name="supervisor_name"
+          value={form.supervisor_name}
+          onChange={handleChange}
+          style={inputStyle}
+        />
+      </label>
+
+      <label style={labelStyle}>
+        Block Name:
+        <input
+          type="text"
+          name="block_name"
+          value={form.block_name}
+          onChange={handleChange}
+          style={inputStyle}
+        />
+      </label>
+
+      <label style={labelStyle}>
+        Project Name:
+        <input
+          type="text"
+          name="pariyojna_name"
+          value={form.pariyojna_name}
+          onChange={handleChange}
+          style={inputStyle}
+        />
+      </label>
+
+      <label style={labelStyle}>
+        Sector Name:
+        <input
+          type="text"
+          name="sector_name"
+          value={form.sector_name}
+          onChange={handleChange}
+          style={inputStyle}
+        />
+      </label>
+
+      <label style={labelStyle}>
+        Anganwadi Center Name:
+        <input
+          type="text"
+          name="aanganwadi_kendra_name"
+          value={form.aanganwadi_kendra_name}
+          onChange={handleChange}
+          style={inputStyle}
+        />
+      </label>
+
       <button type="submit" style={buttonStyle}>
-        Add Anganwadi
+        Add Anganwadi Worker
       </button>
     </form>
   );

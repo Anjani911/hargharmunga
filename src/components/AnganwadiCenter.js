@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
+import anganwadiService from '../services/anganwadiService';
 import {
   Search,
   LocationOn,
@@ -34,10 +35,25 @@ const FilterBar = styled.div`
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
   margin-bottom: 30px;
-  display: flex;
-  gap: 20px;
-  align-items: center;
-  flex-wrap: wrap;
+  
+  .filter-section {
+    margin-bottom: 20px;
+    
+    h4 {
+      margin: 0 0 15px 0;
+      color: #333;
+      font-size: 16px;
+      font-weight: 600;
+    }
+  }
+  
+  .filter-row {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
+  }
   
   .search-box {
     position: relative;
@@ -64,6 +80,39 @@ const FilterBar = styled.div`
       transform: translateY(-50%);
       color: #666;
     }
+  }
+`;
+
+const FilterDropdown = styled.select`
+  padding: 10px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 14px;
+  min-width: 180px;
+  background: white;
+  
+  &:focus {
+    outline: none;
+    border-color: #4CAF50;
+  }
+  
+  &:disabled {
+    background: #f5f5f5;
+    color: #999;
+  }
+`;
+
+const ClearButton = styled.button`
+  padding: 10px 20px;
+  background: #f44336;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  
+  &:hover {
+    background: #d32f2f;
   }
 `;
 
@@ -367,6 +416,23 @@ const AnganwadiCenter = () => {
   const [selectedCenter, setSelectedCenter] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [language, setLanguage] = useState('hindi');
+  
+  // New state for hierarchical filters
+  const [filters, setFilters] = useState({
+    pariyojnaName: '',
+    sectorName: '',
+    villageName: '',
+    aanganwadiKendraName: ''
+  });
+  
+  const [filterOptions, setFilterOptions] = useState({
+    pariyojnaList: [],
+    sectorList: [],
+    villageList: [],
+    aanganwadiList: []
+  });
+  
+  const [filteredUsers, setFilteredUsers] = useState([]);
 
   // Load saved language from localStorage
   useEffect(() => {
@@ -381,6 +447,111 @@ const AnganwadiCenter = () => {
     window.addEventListener('languageChange', handleLanguageChange);
     return () => window.removeEventListener('languageChange', handleLanguageChange);
   }, []);
+
+  // Load initial pariyojna list
+  useEffect(() => {
+    loadPariyojnaList();
+  }, []);
+
+  // Load sectors when pariyojna changes
+  useEffect(() => {
+    if (filters.pariyojnaName) {
+      loadSectorList(filters.pariyojnaName);
+    } else {
+      setFilterOptions(prev => ({ ...prev, sectorList: [] }));
+      setFilters(prev => ({ ...prev, sectorName: '', villageName: '', aanganwadiKendraName: '' }));
+    }
+  }, [filters.pariyojnaName]);
+
+  // Load villages when sector changes
+  useEffect(() => {
+    if (filters.sectorName) {
+      loadVillageList(filters.pariyojnaName, filters.sectorName);
+    } else {
+      setFilterOptions(prev => ({ ...prev, villageList: [] }));
+      setFilters(prev => ({ ...prev, villageName: '', aanganwadiKendraName: '' }));
+    }
+  }, [filters.sectorName]);
+
+  // Load aanganwadi centers when village changes
+  useEffect(() => {
+    if (filters.villageName) {
+      loadAanganwadiList(filters.pariyojnaName, filters.sectorName, filters.villageName);
+    } else {
+      setFilterOptions(prev => ({ ...prev, aanganwadiList: [] }));
+      setFilters(prev => ({ ...prev, aanganwadiKendraName: '' }));
+    }
+  }, [filters.villageName]);
+
+  // Load filtered users when any filter changes
+  useEffect(() => {
+    loadFilteredUsers();
+  }, [filters]);
+
+  const loadPariyojnaList = async () => {
+    try {
+      const list = await anganwadiService.getPariyojnaList();
+      setFilterOptions(prev => ({ ...prev, pariyojnaList: list }));
+    } catch (error) {
+      console.error('Error loading pariyojna list:', error);
+    }
+  };
+
+  const loadSectorList = async (pariyojnaName) => {
+    try {
+      const list = await anganwadiService.getSectorList(pariyojnaName);
+      setFilterOptions(prev => ({ ...prev, sectorList: list }));
+    } catch (error) {
+      console.error('Error loading sector list:', error);
+    }
+  };
+
+  const loadVillageList = async (pariyojnaName, sectorName) => {
+    try {
+      const list = await anganwadiService.getVillageList(pariyojnaName, sectorName);
+      setFilterOptions(prev => ({ ...prev, villageList: list }));
+    } catch (error) {
+      console.error('Error loading village list:', error);
+    }
+  };
+
+  const loadAanganwadiList = async (pariyojnaName, sectorName, villageName) => {
+    try {
+      const list = await anganwadiService.getAanganwadiList(pariyojnaName, sectorName, villageName);
+      setFilterOptions(prev => ({ ...prev, aanganwadiList: list }));
+    } catch (error) {
+      console.error('Error loading aanganwadi list:', error);
+    }
+  };
+
+  const loadFilteredUsers = async () => {
+    try {
+      const users = await anganwadiService.getFilteredUsers(filters);
+      setFilteredUsers(users);
+    } catch (error) {
+      console.error('Error loading filtered users:', error);
+    }
+  };
+
+  const handleFilterChange = (filterName, value) => {
+    setFilters(prev => {
+      const newFilters = { ...prev, [filterName]: value };
+      
+      // Clear dependent filters when parent filter changes
+      if (filterName === 'pariyojnaName') {
+        newFilters.sectorName = '';
+        newFilters.villageName = '';
+        newFilters.aanganwadiKendraName = '';
+      } else if (filterName === 'sectorName') {
+        newFilters.villageName = '';
+        newFilters.aanganwadiKendraName = '';
+      } else if (filterName === 'villageName') {
+        newFilters.aanganwadiKendraName = '';
+      }
+      
+      return newFilters;
+    });
+  };
 
   // Translation content
   const content = {
@@ -402,7 +573,16 @@ const AnganwadiCenter = () => {
       plantId: 'पौधा',
       growing: 'बढ़ रहा है',
       healthy: 'स्वस्थ',
-      needsCare: 'देखभाल चाहिए'
+      needsCare: 'देखभाल चाहिए',
+      pariyojnaName: 'परियोजना का नाम',
+      sectorName: 'सेक्टर का नाम',
+      villageName: 'गांव का नाम',
+      aanganwadiKendraName: 'आंगनबाड़ी केंद्र का नाम',
+      selectPariyojna: 'परियोजना चुनें',
+      selectSector: 'सेक्टर चुनें',
+      selectVillage: 'गांव चुनें',
+      selectAanganwadi: 'आंगनबाड़ी केंद्र चुनें',
+      clearFilters: 'फिल्टर साफ़ करें'
     },
     english: {
       anganwadiCenters: 'Anganwadi Centers',
@@ -422,15 +602,35 @@ const AnganwadiCenter = () => {
       plantId: 'Plant',
       growing: 'Growing',
       healthy: 'Healthy',
-      needsCare: 'Needs Care'
+      needsCare: 'Needs Care',
+      pariyojnaName: 'Project Name',
+      sectorName: 'Sector Name',
+      villageName: 'Village Name',
+      aanganwadiKendraName: 'Anganwadi Center Name',
+      selectPariyojna: 'Select Project',
+      selectSector: 'Select Sector',
+      selectVillage: 'Select Village',
+      selectAanganwadi: 'Select Anganwadi Center',
+      clearFilters: 'Clear Filters'
     }
   };
 
   const t = content[language];
 
+  // Calculate stats from filtered data
   const stats = [
-    { label: t.totalCenters, number: '156', icon: Home, color: '#4CAF50' },
-    { label: t.activeCenters, number: '148', icon: '✅', color: '#2196F3' }
+    { 
+      label: t.totalCenters, 
+      number: filteredUsers.length.toString(), 
+      icon: Home, 
+      color: '#4CAF50' 
+    },
+    { 
+      label: t.activeCenters, 
+      number: filteredUsers.filter(user => user.role === 'aanganwadi_worker').length.toString(), 
+      icon: '', 
+      color: '#2196F3' 
+    }
   ];
 
   const anganwadiCenters = [
@@ -531,6 +731,13 @@ const AnganwadiCenter = () => {
   };
 
   const handleInspect = (center) => {
+    console.log('=== Selected Center Debug ===');
+    console.log('Full Center Data:', center);
+    console.log('aanganwadi_kendra_name:', center.aanganwadi_kendra_name);
+    console.log('pariyojna_name:', center.pariyojna_name);
+    console.log('sector_name:', center.sector_name);
+    console.log('supervisor_name:', center.supervisor_name);
+    console.log('=== End Debug ===');
     setSelectedCenter(center);
     setIsModalOpen(true);
   };
@@ -540,11 +747,42 @@ const AnganwadiCenter = () => {
     setSelectedCenter(null);
   };
 
-  const filteredCenters = anganwadiCenters.filter(center => 
-    center.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    center.address.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    center.inCharge.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Combine filtered users with search term filtering
+  const filteredCenters = filteredUsers
+    .filter(user => {
+      if (!searchTerm) return true;
+      const searchLower = searchTerm.toLowerCase();
+      return (
+        (user.name && user.name.toLowerCase().includes(searchLower)) ||
+        (user.contact_number && user.contact_number.toLowerCase().includes(searchLower)) ||
+        (user.gram && user.gram.toLowerCase().includes(searchLower)) ||
+        (user.aanganwadi_kendra_name && user.aanganwadi_kendra_name.toLowerCase().includes(searchLower))
+      );
+    })
+    .map(user => ({
+      id: user.id,
+      code: `AWC-${user.id}`,
+      name: user.aanganwadi_kendra_name || `${language === 'hindi' ? 'आंगनबाड़ी केंद्र' : 'Anganwadi Center'} #${user.id}`,
+      address: `${user.village_name || user.gram || ''}, ${user.block_name || user.block || ''}, ${user.zila || ''}`.replace(/^,\s*|,\s*$/g, ''),
+      inCharge: user.name,
+      phone: user.contact_number,
+      families: Math.floor(Math.random() * 30) + 10, // Demo data
+      plants: Math.floor(Math.random() * 100) + 20, // Demo data  
+      children: Math.floor(Math.random() * 50) + 15, // Demo data
+      status: 'active',
+      // Complete registration data
+      pariyojna_name: user.pariyojna_name,
+      sector_name: user.sector_name,
+      village_name: user.village_name,
+      supervisor_name: user.supervisor_name,
+      block_name: user.block_name,
+      gram: user.gram,
+      tehsil: user.tehsil,
+      zila: user.zila,
+      role: user.role,
+      created_at: user.created_at,
+      aanganwadi_kendra_name: user.aanganwadi_kendra_name // Add this explicitly for modal
+    }));
 
   return (
     <AnganwadiContainer>
@@ -565,14 +803,86 @@ const AnganwadiCenter = () => {
       </StatsRow>
 
       <FilterBar>
-        <div className="search-box">
-          <input
-            type="text"
-            placeholder={t.searchPlaceholder}
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-          <Search className="search-icon" />
+        <div className="filter-section">
+          <h4>{language === 'hindi' ? 'फिल्टर करें' : 'Filter Options'}</h4>
+          
+          <div className="filter-row">
+            <FilterDropdown
+              value={filters.pariyojnaName}
+              onChange={(e) => handleFilterChange('pariyojnaName', e.target.value)}
+            >
+              <option value="">{t.selectPariyojna}</option>
+              {filterOptions.pariyojnaList.map((pariyojna, index) => (
+                <option key={index} value={pariyojna}>
+                  {pariyojna}
+                </option>
+              ))}
+            </FilterDropdown>
+
+            <FilterDropdown
+              value={filters.sectorName}
+              onChange={(e) => handleFilterChange('sectorName', e.target.value)}
+              disabled={!filters.pariyojnaName}
+            >
+              <option value="">{t.selectSector}</option>
+              {filterOptions.sectorList.map((sector, index) => (
+                <option key={index} value={sector}>
+                  {sector}
+                </option>
+              ))}
+            </FilterDropdown>
+
+            <FilterDropdown
+              value={filters.villageName}
+              onChange={(e) => handleFilterChange('villageName', e.target.value)}
+              disabled={!filters.sectorName}
+            >
+              <option value="">{t.selectVillage}</option>
+              {filterOptions.villageList.map((village, index) => (
+                <option key={index} value={village}>
+                  {village}
+                </option>
+              ))}
+            </FilterDropdown>
+
+            <FilterDropdown
+              value={filters.aanganwadiKendraName}
+              onChange={(e) => handleFilterChange('aanganwadiKendraName', e.target.value)}
+              disabled={!filters.villageName}
+            >
+              <option value="">{t.selectAanganwadi}</option>
+              {filterOptions.aanganwadiList.map((aanganwadi, index) => (
+                <option key={index} value={aanganwadi}>
+                  {aanganwadi}
+                </option>
+              ))}
+            </FilterDropdown>
+
+            <ClearButton
+              onClick={() => {
+                setFilters({
+                  pariyojnaName: '',
+                  sectorName: '',
+                  villageName: '',
+                  aanganwadiKendraName: ''
+                });
+              }}
+            >
+              {t.clearFilters}
+            </ClearButton>
+          </div>
+        </div>
+        
+        <div className="filter-section">
+          <div className="search-box">
+            <input
+              type="text"
+              placeholder={t.searchPlaceholder}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <Search className="search-icon" />
+          </div>
         </div>
       </FilterBar>
 
@@ -638,24 +948,64 @@ const AnganwadiCenter = () => {
             <div className="modal-body">
               <CenterDetails>
                 <div className="detail-row">
-                  <Home className="icon" />
-                  <span className="label">{t.centerCode}</span>
-                  <span className="value">{selectedCenter.code}</span>
-                </div>
-                <div className="detail-row">
                   <People className="icon" />
-                  <span className="label">{t.inCharge}</span>
+                  <span className="label">Name:</span>
                   <span className="value">{selectedCenter.inCharge}</span>
                 </div>
                 <div className="detail-row">
-                  <Phone className="icon" />
-                  <span className="label">{t.contactNumber}</span>
-                  <span className="value">{selectedCenter.phone}</span>
+                  <Home className="icon" />
+                  <span className="label">Role:</span>
+                  <span className="value">{selectedCenter.role || 'aanganwadi_worker'}</span>
+                </div>
+                <div className="detail-row">
+                  <Home className="icon" />
+                  <span className="label">Aanganwadi Center Name:</span>
+                  <span className="value">{selectedCenter.aanganwadi_kendra_name || selectedCenter.name || 'N/A'}</span>
+                </div>
+                <div className="detail-row">
+                  <Home className="icon" />
+                  <span className="label">Project Name:</span>
+                  <span className="value">{selectedCenter.pariyojna_name || 'N/A'}</span>
+                </div>
+                <div className="detail-row">
+                  <Home className="icon" />
+                  <span className="label">Sector Name:</span>
+                  <span className="value">{selectedCenter.sector_name || 'N/A'}</span>
+                </div>
+                <div className="detail-row">
+                  <People className="icon" />
+                  <span className="label">Supervisor Name:</span>
+                  <span className="value">{selectedCenter.supervisor_name || 'N/A'}</span>
                 </div>
                 <div className="detail-row">
                   <LocationOn className="icon" />
-                  <span className="label">{t.address}</span>
-                  <span className="value">{selectedCenter.address}</span>
+                  <span className="label">Village/Gram:</span>
+                  <span className="value">{selectedCenter.village_name || selectedCenter.gram || 'N/A'}</span>
+                </div>
+                <div className="detail-row">
+                  <Home className="icon" />
+                  <span className="label">Block:</span>
+                  <span className="value">{selectedCenter.block_name || 'N/A'}</span>
+                </div>
+                <div className="detail-row">
+                  <Home className="icon" />
+                  <span className="label">Tehsil:</span>
+                  <span className="value">{selectedCenter.tehsil || 'N/A'}</span>
+                </div>
+                <div className="detail-row">
+                  <Home className="icon" />
+                  <span className="label">Zila:</span>
+                  <span className="value">{selectedCenter.zila || 'N/A'}</span>
+                </div>
+                <div className="detail-row">
+                  <Phone className="icon" />
+                  <span className="label">Contact:</span>
+                  <span className="value">{selectedCenter.phone || 'N/A'}</span>
+                </div>
+                <div className="detail-row">
+                  <Home className="icon" />
+                  <span className="label">Created At:</span>
+                  <span className="value">{selectedCenter.created_at ? new Date(selectedCenter.created_at).toLocaleString() : 'N/A'}</span>
                 </div>
               </CenterDetails>
 

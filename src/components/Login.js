@@ -167,25 +167,6 @@ const InputIcon = styled.div`
   font-size: 20px;
 `;
 
-const DemoCredentials = styled.div`
-  background: #f5f5f5;
-  padding: 15px;
-  border-radius: 8px;
-  margin: 15px 0;
-  font-size: 13px;
-  
-  .title {
-    font-weight: bold;
-    color: #4CAF50;
-    margin-bottom: 8px;
-  }
-  
-  .cred {
-    margin: 4px 0;
-    color: #666;
-  }
-`;
-
 const LoginButton = styled.button`
   background: #2E7D32;
   color: white;
@@ -335,10 +316,10 @@ const Login = () => {
   localStorage.setItem('authToken', result.data.token);
 }
  else {
-        setConnectionStatus('❌ Backend connection failed. Using demo mode.');
+        setConnectionStatus('Backend connection failed. Using demo mode.');
       }
     } catch (error) {
-      setConnectionStatus('❌ Backend connection failed. Using demo mode.');
+      setConnectionStatus('Backend connection failed. Using demo mode.');
     } finally {
       setTestingConnection(false);
     }
@@ -390,7 +371,7 @@ const Login = () => {
       <LoginCard>
         <LeftSection>
           <TreeIcon>
-            🌳
+            
           </TreeIcon>
           
           <MainTitle>हर घर मुंगा</MainTitle>
@@ -402,19 +383,19 @@ const Login = () => {
           
           <FeatureList>
             <div className="feature">
-              <span className="icon">🌿</span>
+              <span className="icon"></span>
               पौधा प्रबंधन व्यवस्था
             </div>
             <div className="feature">
-              <span className="icon">👨‍👩‍👧‍👦</span>
+              <span className="icon"></span>
               माता/हितग्राही प्रबंधन सिस्टम
             </div>
             <div className="feature">
-              <span className="icon">📊</span>
+              <span className="icon"></span>
               रिपोर्ट और विश्लेषण
             </div>
             <div className="feature">
-              <span className="icon">🔒</span>
+              <span className="icon"></span>
               सुरक्षित डेटा प्रबंधन
             </div>
           </FeatureList>
@@ -436,7 +417,7 @@ const Login = () => {
                 onChange={handleInputChange}
                 required
               />
-              <InputIcon>👤</InputIcon>
+              <InputIcon></InputIcon>
             </InputGroup>
 
             <InputGroup>
@@ -450,16 +431,6 @@ const Login = () => {
               />
               <InputIcon>🔒</InputIcon>
             </InputGroup>
-
-            <DemoCredentials>
-              <div className="title">डेमो लॉगिन जानकारी:</div>
-              <div className="cred">• admin555 / admin@222 (एडमिन)</div>
-              <div className="cred">• supervisor / super123 (सुपरवाइजर)</div>
-              <div className="cred">• demo / demo123 (यूजर)</div>
-              <div className="cred">• test / test123 (टेस्ट एडमिन)</div>
-              <div className="cred">• hgm / hgm2024 (HGM एडमिन)</div>
-              <div className="cred">• raipur / raipur123 (रायपुर सुपरवाइजर)</div>
-            </DemoCredentials>
 
             {error && (
               <ConnectionStatus className="error">{error}</ConnectionStatus>
@@ -481,7 +452,7 @@ const Login = () => {
           <Footer>
             © 2024 हर घर मुंगा योजना। सभी अधिकार सुरक्षित।
             <div className="powered">
-              सहायता के लिए <span className="org">यहाँ संपर्क करें</span>
+              <span className="org">Powered by SSIPMT</span>
             </div>
           </Footer>
         </RightSection>

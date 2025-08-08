@@ -6,7 +6,7 @@ const API_CONFIG = {
   API_KEY: process.env.REACT_APP_API_KEY || "demo-hgm-api-key-2024-raipur",
 
   // Base URL - Your real backend server URL
-  BASE_URL: "http://165.22.208.62:5000/", // LIVE BACKEND URL
+  BASE_URL: process.env.REACT_APP_API_URL || "http://localhost:5001",
 
   // Debug mode
   DEBUG_MODE: process.env.REACT_APP_DEBUG_MODE === "true",

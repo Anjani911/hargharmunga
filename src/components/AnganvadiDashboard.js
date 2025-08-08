@@ -49,31 +49,62 @@ const SidebarButton = ({ icon, label, onClick, active = false }) => (
     style={{
       display: "flex",
       alignItems: "center",
-      gap: 12,
-      background: active ? "#388e3c" : "transparent",
+      gap: 16,
+      background: active ? "rgba(255, 255, 255, 0.2)" : "transparent",
       border: "none",
       color: "#fff",
-      padding: "14px 20px",
+      padding: "16px 24px",
       width: "100%",
-      fontSize: 16,
-      fontWeight: 500,
+      fontSize: 15,
+      fontWeight: active ? 600 : 500,
       cursor: "pointer",
-      borderRadius: 10,
-      marginBottom: 8,
-      transition: "background 0.2s",
+      borderRadius: 12,
+      marginBottom: 4,
+      transition: "all 0.3s ease",
+      position: "relative",
+      overflow: "hidden",
+      textAlign: "left",
+    }}
+    onMouseEnter={(e) => {
+      if (!active) {
+        e.target.style.background = "rgba(255, 255, 255, 0.15)";
+        e.target.style.transform = "translateX(4px)";
+      }
+    }}
+    onMouseLeave={(e) => {
+      if (!active) {
+        e.target.style.background = "transparent";
+        e.target.style.transform = "translateX(0px)";
+      }
     }}
   >
-    <span
-      style={{
-        width: 28,
-        display: "flex",
-        alignItems: "center",
+    <span 
+      style={{ 
+        width: 24, 
+        height: 24,
+        display: "flex", 
+        alignItems: "center", 
         justifyContent: "center",
+        fontSize: 18,
+        filter: active ? "brightness(1.2)" : "brightness(1)"
       }}
     >
       {icon}
     </span>
-    <span>{label}</span>
+    <span style={{ flex: 1 }}>{label}</span>
+    {active && (
+      <div
+        style={{
+          position: "absolute",
+          right: 0,
+          top: 0,
+          bottom: 0,
+          width: 4,
+          background: "#fff",
+          borderRadius: "2px 0 0 2px"
+        }}
+      />
+    )}
   </button>
 );
 
@@ -238,14 +269,18 @@ const AnganvadiDashboard = () => {
       console.log("Fetching Anganvadi data…");
       setLoading(true);
       try {
-        const res = await fetch("http://165.22.208.62:5000/searchAng");
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/searchAng`);
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const rows = await res.json();
+        const response = await res.json();
+        
+        // Handle new response structure
+        const rows = response.data || response || [];
         console.log("Fetched rows:", rows.length);
+        
         setRecords(rows);
         setStats({
           total: rows.length,
-          uniqueVillages: new Set(rows.map((r) => r.gram || r.zila || "")).size,
+          uniqueVillages: new Set(rows.map((r) => r.village_name || r.gram || r.zila || "")).size,
         });
       } catch (err) {
         console.error("Fetch error:", err);
@@ -278,43 +313,115 @@ const AnganvadiDashboard = () => {
 
   return (
     <div style={{ minHeight: "100vh", background: "#f5f5f5", display: "flex" }}>
-      {/* Sidebar */}
+      {/* Enhanced Sidebar */}
       <aside
         style={{
-          width: 260,
-          background: "linear-gradient(180deg, #2E7D32, #388e3c)",
+          width: 280,
+          background: "linear-gradient(180deg, #1B5E20 0%, #2E7D32 50%, #388E3C 100%)",
           color: "#fff",
           display: "flex",
           flexDirection: "column",
-          padding: "32px 0",
-          boxShadow: "2px 0 12px rgba(44,62,80,0.06)",
+          padding: 0,
+          boxShadow: "4px 0 20px rgba(0, 0, 0, 0.1)",
           minHeight: "100vh",
+          position: "relative",
         }}
       >
-        <div
-          style={{
-            fontWeight: "bold",
-            fontSize: 24,
-            textAlign: "center",
-            marginBottom: 24,
+        {/* Header Section */}
+        <div 
+          style={{ 
+            padding: "32px 24px 24px",
+            borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
+            background: "rgba(0, 0, 0, 0.1)"
           }}
         >
-          🌿 Anganvadi Dashboard
+          <div 
+            style={{ 
+              fontWeight: "bold", 
+              fontSize: 26, 
+              textAlign: "center", 
+              marginBottom: 8,
+              background: "linear-gradient(45deg, #fff, #e8f5e8)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text"
+            }}
+          >
+            Anganwadi Dashboard
+          </div>
+          <div 
+            style={{ 
+              fontSize: 13, 
+              textAlign: "center", 
+              color: "rgba(255, 255, 255, 0.8)",
+              fontWeight: 400
+            }}
+          >
+            Centers Management
+          </div>
         </div>
 
-        <SidebarButton
-          icon={icons.dashboard}
-          label="Back to Student Dashboard"
-          onClick={() => navigate("/dashboard")}
-        />
+        {/* Navigation Section */}
+        <nav style={{ padding: "24px 24px", flex: 1 }}>
+          <div 
+            style={{ 
+              fontSize: 13, 
+              fontWeight: 600, 
+              color: "rgba(255, 255, 255, 0.7)",
+              marginBottom: 12,
+              textTransform: "uppercase",
+              letterSpacing: 0.5
+            }}
+          >
+            Navigation
+          </div>
+          <SidebarButton
+            icon={icons.dashboard}
+            label="Back to Student Dashboard"
+            onClick={() => navigate("/dashboard")}
+          />
+          
+          <div style={{ marginTop: 32 }}>
+            <div 
+              style={{ 
+                fontSize: 13, 
+                fontWeight: 600, 
+                color: "rgba(255, 255, 255, 0.7)",
+                marginBottom: 12,
+                textTransform: "uppercase",
+                letterSpacing: 0.5
+              }}
+            >
+              Account
+            </div>
+            <SidebarButton
+              icon={icons.logout}
+              label="Logout"
+              onClick={handleLogout}
+            />
+          </div>
+        </nav>
 
-        <div style={{ flex: 1 }} />
-
-        <SidebarButton
-          icon={icons.logout}
-          label="Logout"
-          onClick={handleLogout}
-        />
+        {/* Footer Section */}
+        <div 
+          style={{ 
+            padding: "24px",
+            borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+            background: "rgba(0, 0, 0, 0.1)"
+          }}
+        >
+          <div 
+            style={{ 
+              fontSize: 12, 
+              color: "rgba(255, 255, 255, 0.6)", 
+              textAlign: "center",
+              lineHeight: 1.4
+            }}
+          >
+            Powered by<br/>
+            <span style={{ fontWeight: 600, color: "rgba(255, 255, 255, 0.9)" }}>SSIPMT</span>
+          </div>
+        </div>
       </aside>
 
       {/* Main */}
@@ -334,7 +441,7 @@ const AnganvadiDashboard = () => {
             <StatCard
               label="Unique Villages"
               value={stats.uniqueVillages}
-              icon="🏡"
+              icon=""
             />
           </div>
 

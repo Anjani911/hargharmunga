@@ -5,6 +5,117 @@ import apiService from './apiService';
 import API_CONFIG, { getEndpointUrl } from '../config/api';
 
 class AnganwadiService {
+  // Get hierarchical filter options with search support for USERS table
+  async getPariyojnaList(searchTerm = '') {
+    try {
+      const params = searchTerm ? `?search=${encodeURIComponent(searchTerm)}` : '';
+      const response = await apiService.get(`/get-pariyojna-list-users${params}`);
+      if (response.success) {
+        return response;
+      }
+      return { success: false, data: [] };
+    } catch (error) {
+      console.error('Error fetching pariyojna list:', error);
+      return { success: false, data: [] };
+    }
+  }
+
+  async getSectorList(pariyojnaName = null, searchTerm = '') {
+    try {
+      const params = new URLSearchParams();
+      if (pariyojnaName) params.append('pariyojna_name', pariyojnaName);
+      if (searchTerm) params.append('search', searchTerm);
+      const queryString = params.toString() ? `?${params.toString()}` : '';
+      
+      const response = await apiService.get(`/get-sector-list-users${queryString}`);
+      if (response.success) {
+        return response;
+      }
+      return { success: false, data: [] };
+    } catch (error) {
+      console.error('Error fetching sector list:', error);
+      return { success: false, data: [] };
+    }
+  }
+
+  async getVillageList(pariyojnaName = null, sectorName = null, searchTerm = '') {
+    try {
+      const params = new URLSearchParams();
+      if (pariyojnaName) params.append('pariyojna_name', pariyojnaName);
+      if (sectorName) params.append('sector_name', sectorName);
+      if (searchTerm) params.append('search', searchTerm);
+      const queryString = params.toString() ? `?${params.toString()}` : '';
+      
+      const response = await apiService.get(`/get-village-list-users${queryString}`);
+      if (response.success) {
+        return response;
+      }
+      return { success: false, data: [] };
+    } catch (error) {
+      console.error('Error fetching village list:', error);
+      return { success: false, data: [] };
+    }
+  }
+
+  async getAanganwadiList(pariyojnaName = null, sectorName = null, villageName = null, searchTerm = '') {
+    try {
+      const params = new URLSearchParams();
+      if (pariyojnaName) params.append('pariyojna_name', pariyojnaName);
+      if (sectorName) params.append('sector_name', sectorName);
+      if (villageName) params.append('village_name', villageName);
+      if (searchTerm) params.append('search', searchTerm);
+      const queryString = params.toString() ? `?${params.toString()}` : '';
+      
+      const response = await apiService.get(`/get-aanganwadi-list-users${queryString}`);
+      if (response.success) {
+        return response;
+      }
+      return { success: false, data: [] };
+    } catch (error) {
+      console.error('Error fetching aanganwadi list:', error);
+      return { success: false, data: [] };
+    }
+  }
+
+  async getAllUsers(filters = {}) {
+    try {
+      const params = new URLSearchParams();
+      if (filters.pariyojnaName) params.append('pariyojna_name', filters.pariyojnaName);
+      if (filters.sectorName) params.append('sector_name', filters.sectorName);
+      if (filters.villageName) params.append('village_name', filters.villageName);
+      if (filters.aanganwadiKendraName) params.append('aanganwadi_kendra_name', filters.aanganwadiKendraName);
+      const queryString = params.toString() ? `?${params.toString()}` : '';
+      
+      const response = await apiService.get(`/get-filtered-users${queryString}`);
+      if (response.success) {
+        return response;
+      }
+      return { success: false, data: [] };
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      return { success: false, data: [] };
+    }
+  }
+
+  async getFilteredUsers(filters = {}) {
+    try {
+      const params = new URLSearchParams();
+      if (filters.pariyojnaName) params.append('pariyojna_name', filters.pariyojnaName);
+      if (filters.sectorName) params.append('sector_name', filters.sectorName);
+      if (filters.villageName) params.append('village_name', filters.villageName);
+      if (filters.aanganwadiKendraName) params.append('aanganwadi_kendra_name', filters.aanganwadiKendraName);
+      const queryString = params.toString() ? `?${params.toString()}` : '';
+      
+      const response = await apiService.get(`/get-filtered-users${queryString}`);
+      if (response.success) {
+        return response;
+      }
+      return { success: false, data: [] };
+    } catch (error) {
+      console.error('Error fetching filtered users:', error);
+      return { success: false, data: [] };
+    }
+  }
   // Get all anganwadi centers
   async getAnganwadiCenters(page = 1, limit = 10, filters = {}) {
     try {
@@ -280,4 +391,13 @@ class AnganwadiService {
 }
 
 const anganwadiService = new AnganwadiService();
+
+// Named exports for functions
+export const getPariyojnaList = (searchTerm) => anganwadiService.getPariyojnaList(searchTerm);
+export const getSectorList = (pariyojnaName, searchTerm) => anganwadiService.getSectorList(pariyojnaName, searchTerm);
+export const getVillageList = (pariyojnaName, sectorName, searchTerm) => anganwadiService.getVillageList(pariyojnaName, sectorName, searchTerm);
+export const getAanganwadiList = (pariyojnaName, sectorName, villageName, searchTerm) => anganwadiService.getAanganwadiList(pariyojnaName, sectorName, villageName, searchTerm);
+export const getAllUsers = (filters) => anganwadiService.getAllUsers(filters);
+export const getFilteredUsers = (filters) => anganwadiService.getFilteredUsers(filters);
+
 export default anganwadiService;

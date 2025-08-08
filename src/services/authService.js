@@ -32,18 +32,10 @@ class AuthService {
         throw new Error('Invalid credentials');
       }
     } catch (error) {
-      console.log('AuthService: Backend login failed, checking demo credentials...', error.message);
-      
-      // Fallback to demo login for testing
-      if (this.isDemoCredentials(credentials)) {
-        console.log('AuthService: Using demo login as fallback');
-        return this.handleDemoLogin(credentials);
-      }
-      
-      console.error('AuthService: Login failed completely');
+      console.error('AuthService: Login failed');
       return {
         success: false,
-        message: 'Login error occurred',
+        message: 'Invalid credentials',
         error: error.message
       };
     }
@@ -122,80 +114,6 @@ class AuthService {
     localStorage.removeItem('userRole');
     localStorage.removeItem('userName');
     localStorage.removeItem('userId');
-  }
-
-  // Check if credentials are demo credentials
-  isDemoCredentials(credentials) {
-    const demoUsers = [
-      { username: 'admin555', password: 'admin@222' },
-      { username: 'supervisor', password: 'super123' },
-      { username: 'demo', password: 'demo123' },
-      { username: 'test', password: 'test123' },
-      { username: 'hgm', password: 'hgm2024' },
-      { username: 'raipur', password: 'raipur123' }
-    ];
-
-    return demoUsers.some(user => 
-      user.username === credentials.username && 
-      user.password === credentials.password
-    );
-  }
-
-  // Handle demo login
-  handleDemoLogin(credentials) {
-    let userRole = 'admin';
-    let userName = 'Admin Raipur';
-    let userId = 'demo-001';
-
-    if (credentials.username === 'admin555') {
-      userRole = 'admin';
-      userName = 'Admin Raipur';
-      userId = 'demo-001';
-    } else if (credentials.username === 'supervisor') {
-      userRole = 'supervisor';
-      userName = 'Supervisor Demo';
-      userId = 'demo-002';
-    } else if (credentials.username === 'demo') {
-      userRole = 'user';
-      userName = 'Demo User';
-      userId = 'demo-003';
-    } else if (credentials.username === 'test') {
-      userRole = 'admin';
-      userName = 'Test Admin';
-      userId = 'demo-004';
-    } else if (credentials.username === 'hgm') {
-      userRole = 'admin';
-      userName = 'HGM Administrator';
-      userId = 'demo-005';
-    } else if (credentials.username === 'raipur') {
-      userRole = 'supervisor';
-      userName = 'Raipur Supervisor';
-      userId = 'demo-006';
-    }
-
-    // Generate demo token
-    const demoToken = `demo-token-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
-    // Store demo authentication data
-    localStorage.setItem('authToken', demoToken);
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('userRole', userRole);
-    localStorage.setItem('userName', userName);
-    localStorage.setItem('userId', userId);
-
-    return {
-      success: true,
-      message: 'Demo login successful',
-      data: {
-        token: demoToken,
-        user: {
-          id: userId,
-          name: userName,
-          role: userRole,
-          permissions: this.getUserPermissions(userRole)
-        }
-      }
-    };
   }
 
   // Get user permissions based on role

@@ -181,7 +181,7 @@ function BackendTester() {
       </TestSection>
 
       <TestSection>
-        <h3>👤 Login Test</h3>
+        <h3>Login Test</h3>
         <div>
           <Input
             type="text"
@@ -245,7 +245,7 @@ function BackendTester() {
       </TestSection>
 
       <TestSection>
-        <h3>📋 User Details Test</h3>
+        <h3>User Details Test</h3>
         <TestButton onClick={testGetDetails} disabled={loading.details}>
           {loading.details ? 'Testing...' : 'Test Get Details (/details)'}
         </TestButton>
